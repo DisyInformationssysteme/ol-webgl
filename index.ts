@@ -9,10 +9,33 @@ import LineString from 'ol/geom/LineString';
 import VectorSource from 'ol/source/Vector';
 import WebGLVectorLayerRenderer from 'ol/renderer/webgl/VectorLayer';
 import Layer from 'ol/layer/Layer';
+import PointVert from './point.vert';
+import PointFrag from './point.frag';
+import ArrowVert from './arrow.vert';
+import ArrowFrag from './arrow.frag';
 
+console.log(ArrowFrag);
+/*
+ * Points use options.point.vertex/fragmentShader
+ * LineStrings use options.stroke.vertex/fragmentShader
+ */
 class MyLayer extends Layer {
     createRenderer(): WebGLVectorLayerRenderer {
-        return new WebGLVectorLayerRenderer(this, { });
+        return new WebGLVectorLayerRenderer(
+            this,
+            { 
+                point: {
+                    vertexShader: PointVert,
+                    fragmentShader: PointFrag,
+                    attributes: {},
+                },
+                stroke: {
+                    vertexShader: ArrowVert,
+                    fragmentShader: ArrowFrag,
+                    attributes: {},
+                },
+            },
+        );
     }
 }
 
@@ -29,6 +52,7 @@ const map = new Map({
     ],
     target: document.getElementById('map')!,
     view: new View({
+        // view a nice part of the timeline
         center: [1588138.6115797842, 5773917.459455677],
         zoom: 15.355,
     }),
