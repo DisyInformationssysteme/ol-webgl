@@ -9,3 +9,17 @@ This technique can also be used to make the lines look like arrows.
 npm install
 npm run serve
 ```
+
+# resource
+
+The chapter Algorithmic Drawing is of interest.
+
+https://thebookofshaders.com/
+
+Functions for constructing various 2d shapes.
+
+https://iquilezles.org/articles/distfunctions2d/
+
+MDN Best Practices, contains tips to ensure compatability across devices.
+
+https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices
