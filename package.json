@@ -1,0 +1,15 @@
+{
+    "name": "ol-webgl",
+    "scripts": {
+        "lint": "tsc -noEmit",
+        "build": "esbuild index.ts --bundle --outdir=dist --minify --sourcemap --target=chrome110,firefox110",
+        "serve": "esbuild index.ts --bundle --outdir=dist --minify --sourcemap --target=chrome110,firefox110 --servedir=dist"
+    },
+    "dependencies": {
+        "ol": "7.3.0"
+    },
+    "devDependencies": {
+        "esbuild": "0.17.11",
+        "typescript": "^4.9.5"
+    }
+}
