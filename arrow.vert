@@ -1,12 +1,16 @@
 precision mediump float;
 uniform mat4 u_projectionMatrix;
 uniform vec2 u_sizePx;
+uniform float u_currentTimeMin;
+uniform float u_currentTimeMax;
 attribute vec2 a_segmentStart;
 attribute vec2 a_segmentEnd;
 attribute float a_parameters;
 attribute float a_color;
 attribute float a_opacity;
 attribute float a_width;
+// WebGL does not support int/uint attributes...
+attribute float a_time;
 varying vec2 v_segmentStart;
 varying vec2 v_segmentEnd;
 varying float v_angleStart;
@@ -54,6 +58,8 @@ void main(void) {
   vec2 offsetPx =
       getOffsetDirection(normalPx * normalDir, tangentDir * tangentPx, angle) *
       a_width * 0.5;
+  vec2 visibilityOffset = a_time < u_currentTimeMin || a_time > u_currentTimeMax ? vec2(0.0, 0.0) : vec2(1.0, 1.0);
+  offsetPx *= visibilityOffset;
   vec2 position = vertexNumber < 1.5 ? a_segmentStart : a_segmentEnd;
   gl_Position =
       u_projectionMatrix * vec4(position, 0.0, 1.0) + pxToScreen(offsetPx);
@@ -61,6 +67,6 @@ void main(void) {
   v_segmentEnd = worldToPx(a_segmentEnd);
   v_color = vec3(fract(floor(a_color / 256.0 / 256.0) / 256.0),
                  fract(floor(a_color / 256.0) / 256.0), fract(a_color / 256.0));
-  v_opacity = a_opacity;
+  v_opacity = 1.0;
   v_width = a_width;
 }

@@ -16,7 +16,16 @@ import ArrowFrag from './arrow.frag';
 import {packColor} from 'ol/renderer/webgl/shaders';
 import {asArray} from 'ol/color.js';
 
-let pointSize = 5;
+enum TimeBounds {
+    Min,
+    Max,
+}
+
+let _pointSize = 5;
+let _time = {
+    [TimeBounds.Min]: 0,
+    [TimeBounds.Max]: 0,
+};
 
 /*
  * Points use options.point.vertex/fragmentShader
@@ -37,6 +46,9 @@ class MyLayer extends Layer {
                         color: function() {
                             return packColor(asArray('#05f234'));
                         },
+                        time: function(feature: Feature) {
+                            return feature.get('time');
+                        },
                     },
                 },
                 stroke: {
@@ -49,10 +61,19 @@ class MyLayer extends Layer {
                         color: function() {
                             return packColor(asArray('#ea05f2'));
                         },
+                        time: function(feature: Feature) {
+                            return feature.get('time');
+                        },
+                        isArrow: function(feature: Feature) {
+                            // WebGL does not do boolean attributes, we use a float instead
+                            return feature.get('isArrow') ? 1.0 : 0.0;
+                        }
                     },
                 },
                 uniforms: {
-                    'u_pointSize': function() { return pointSize; },
+                    'u_pointSize': function() { return _pointSize; },
+                    'u_currentTimeMax': function() { return _time[TimeBounds.Max]; },
+                    'u_currentTimeMin': function() { return _time[TimeBounds.Min]; },
                 }
             },
         );
@@ -97,7 +118,7 @@ function createFeatures(): Feature[] {
                     point.getGeometry()!.getCoordinates()
                 ]),
                 time: data[i+2],
-                opacity: 0, // start invisible
+                isArrow: !!(i % 2),
             });
             features.push(arrow);
         }
@@ -108,51 +129,33 @@ function createFeatures(): Feature[] {
 
 function createControls() {
     const container = document.getElementById('controls')!;
-    const earliest = data[2];
-    const latest = data[data.length - 1];
+    _time[TimeBounds.Min] = data[2];
+    _time[TimeBounds.Max] = data[data.length-1];
+    const earliest = _time[TimeBounds.Min];
+    const latest = _time[TimeBounds.Max];
     container.innerHTML = `
-        <label for="time">Time</label>
-        <input id="time" type="range" min="${earliest}" max="${latest}"></input>
+        <label for="timeMin">Time Min</label>
+        <input id="timeMin" type="range" min="${earliest}" max="${latest}" value="${earliest}"></input>
+        <label for="timeMax">Time Max</label>
+        <input id="timeMax" type="range" min="${earliest}" max="${latest}" value="${latest}"></input>
         <label for="pointSize">Point Size</label>
         <input id="pointSize" type="range" min="5" max="50" value="5"></input>
     `;
-    const time = document.getElementById('time')!;
-    time.addEventListener('input', (e) => onTime(parseInt((e.target as HTMLInputElement).value)));
+    const timeMin = document.getElementById('timeMin')!;
+    timeMin.addEventListener('input', (e) => onTime(parseInt((e.target as HTMLInputElement).value), TimeBounds.Min));
+    const timeMax = document.getElementById('timeMax')!;
+    timeMax.addEventListener('input', (e) => onTime(parseInt((e.target as HTMLInputElement).value), TimeBounds.Max));
     const pointSize = document.getElementById('pointSize')!;
     pointSize.addEventListener('input', (e) => onPointSize(parseInt((e.target as HTMLInputElement).value)));
 }
 
 function onPointSize(size: number) {
-    pointSize = size;
+    _pointSize = size;
     map.render();
 }
 
-function onTime(time: number) {
-    // TODO save last visible index, determine feature that changed visibility, only adapt those
-    const idx = searchClosest(features, time);
-    for (let i = 0; i < features.length; i++) {
-        features[i].set('opacity', i <= idx ? 1 : 0);
-    }
+function onTime(time: number, minMax: TimeBounds) {
+    _time[minMax] = time;
+    map.render();
 }
 
-// index of latest visible el by time
-function searchClosest (features: Feature[], time: number) {
-  let low = 0;
-  let mid = 0;
-  let result = -1;
-  let high = features.length - 1;
-  while (low <= high) {
-    mid = Math.floor((low + high) / 2);
-    const featureTime = features[mid].get('time');
-    if (featureTime === time) {
-      return mid;
-    }
-    if (featureTime < time) {
-      result = mid;
-      low = mid + 1;
-    } else {
-      high = mid - 1;
-    }
-  }
-  return result;
-}
