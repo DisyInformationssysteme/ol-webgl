@@ -1,6 +1,7 @@
 precision mediump float;
 uniform float u_pointSize;
 uniform float u_pixelRatio;
+uniform float u_pointColor;
 varying vec3 v_color;
 varying float v_opacity;
 varying vec2 v_position;
@@ -13,6 +14,8 @@ float distanceField(vec2 currentPoint, vec2 position) {
 
 void main(void) {
   vec2 v_currentPoint = gl_FragCoord.xy / u_pixelRatio;
-  gl_FragColor = vec4(v_color, 1.0) * v_opacity;
+  vec3 color = vec3(fract(floor(u_pointColor / 256.0 / 256.0) / 256.0),
+                 fract(floor(u_pointColor / 256.0) / 256.0), fract(u_pointColor / 256.0));
+  gl_FragColor = vec4(color, 1.0) * v_opacity;
   gl_FragColor *= distanceField(v_currentPoint, v_position);
 }

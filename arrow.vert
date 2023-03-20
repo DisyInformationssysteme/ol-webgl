@@ -3,12 +3,15 @@ uniform mat4 u_projectionMatrix;
 uniform vec2 u_sizePx;
 uniform float u_currentTimeMin;
 uniform float u_currentTimeMax;
+uniform float u_arrowSize;
+uniform float u_arrowHeadColor;
+uniform float u_arrowStemColor;
 attribute vec2 a_segmentStart;
 attribute vec2 a_segmentEnd;
 attribute float a_parameters;
-attribute float a_color;
 attribute float a_opacity;
 attribute float a_width;
+attribute float a_isArrow;
 // WebGL does not support int/uint attributes...
 attribute float a_time;
 varying vec2 v_segmentStart;
@@ -65,8 +68,8 @@ void main(void) {
       u_projectionMatrix * vec4(position, 0.0, 1.0) + pxToScreen(offsetPx);
   v_segmentStart = worldToPx(a_segmentStart);
   v_segmentEnd = worldToPx(a_segmentEnd);
-  v_color = vec3(fract(floor(a_color / 256.0 / 256.0) / 256.0),
-                 fract(floor(a_color / 256.0) / 256.0), fract(a_color / 256.0));
+  v_color = vec3(fract(floor(u_arrowStemColor / 256.0 / 256.0) / 256.0),
+                 fract(floor(u_arrowStemColor / 256.0) / 256.0), fract(u_arrowStemColor / 256.0));
   v_opacity = 1.0;
   v_width = a_width;
 }

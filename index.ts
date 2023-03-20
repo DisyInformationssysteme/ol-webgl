@@ -26,6 +26,11 @@ let _time = {
     [TimeBounds.Min]: 0,
     [TimeBounds.Max]: 0,
 };
+let _arrowSize = 5;
+let _pointColor = packColor(asArray('#05f234'));
+let _arrowHeadColor = packColor(asArray('#ffffff'));
+let _arrowStemColor = packColor(asArray('#0008fc'));
+
 
 /*
  * Points use options.point.vertex/fragmentShader
@@ -55,12 +60,6 @@ class MyLayer extends Layer {
                     vertexShader: ArrowVert,
                     fragmentShader: ArrowFrag,
                     attributes: {
-                        opacity: function(feature: Feature) {
-                            return feature.get('opacity');
-                        },
-                        color: function() {
-                            return packColor(asArray('#ea05f2'));
-                        },
                         time: function(feature: Feature) {
                             return feature.get('time');
                         },
@@ -72,8 +71,12 @@ class MyLayer extends Layer {
                 },
                 uniforms: {
                     'u_pointSize': function() { return _pointSize; },
+                    'u_pointColor': function() { return _pointColor; },
                     'u_currentTimeMax': function() { return _time[TimeBounds.Max]; },
                     'u_currentTimeMin': function() { return _time[TimeBounds.Min]; },
+                    'u_arrowSize': function() { return _arrowSize; },
+                    'u_arrowHeadColor': function() { return _arrowHeadColor; },
+                    'u_arrowStemColor': function() { return _arrowStemColor; },
                 }
             },
         );
